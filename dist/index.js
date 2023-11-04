@@ -42629,15 +42629,25 @@ var yaml = __nccwpck_require__(1917);
 
 const select = xpath.useNamespaces({ ra: 'urn:Rockwell/MasterRecipe' });
 
-const remove = (xpath, xml) => select(
+const remove = (
   xpath,
   xml,
-)[0]?.parentNode.removeChild(
-  select(
+  or,
+) => {
+  const time = select(
     xpath,
     xml,
-  )[0].nodeValue
-)
+  )[0]?.parentNode.removeChild(
+    select(
+      xpath,
+      xml,
+    )[0].nodeValue,
+  );
+  if (time === undefined) {
+    return or;
+  }
+  return time.toString();
+}
 
 async function run() {
   try {
@@ -42654,6 +42664,7 @@ async function run() {
     .catch(
       () => '',
     )
+    .then(yaml.load)
     .then(
       (yml) => fs.readdir(
         directory,
@@ -42697,9 +42708,6 @@ async function run() {
           )
         )
         .then(
-          (files) => console.log(yml) || files,
-        )
-        .then(
           (files) => files
             .map(
               ({
@@ -42707,21 +42715,23 @@ async function run() {
                 xml,
               }) => ({
                 filePath,
-                areaModelDate: remove(
+                AreaModelDate: remove(
                   '/ra:RecipeElement/ra:Header/ra:AreaModelDate/text()',
                   xml,
-                ) || yml[filePath]?.AreaModelDate,
-                verificationDate: remove(
+                  yml[filePath].AreaModelDate,
+                ),
+                VerificationDate: remove(
                   '/ra:RecipeElement/ra:Header/ra:VerificationDate/text()',
                   xml,
-                ) || yml[filePath]?.verificationDate,
+                  yml[filePath].VerificationDate,
+                ),
                 xml,
               })
             )
         )
         .then(
           (docs) => fs.writeFile(
-            `${core.getInput('folder')}/recipes.yml`,
+            `${core.getInput('folder') || './recipes'}/recipes.yml`,
             yaml.dump(
               docs
                 .reduce(
