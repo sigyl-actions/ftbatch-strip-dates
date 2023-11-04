@@ -42697,6 +42697,9 @@ async function run() {
           )
         )
         .then(
+          (files) => console.log(yml) || files,
+        )
+        .then(
           (files) => files
             .map(
               ({

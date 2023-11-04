@@ -80,6 +80,9 @@ async function run() {
           )
         )
         .then(
+          (files) => console.log(yml) || files,
+        )
+        .then(
           (files) => files
             .map(
               ({
@@ -101,7 +104,7 @@ async function run() {
         )
         .then(
           (docs) => fs.writeFile(
-            `${core.getInput('folder')}/recipes.yml`,
+            `${core.getInput('folder') || './recipes'}/recipes.yml`,
             yaml.dump(
               docs
                 .reduce(
