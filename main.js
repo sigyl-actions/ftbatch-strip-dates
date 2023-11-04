@@ -28,110 +28,121 @@ async function run() {
       core.getInput('regex') || '^.+\.(([pP][xX][mM][lL]))$' || '.',
     )
     const directory = core.getInput('folder') || './recipes'
-    fs.readdir(
-      directory,
-      { withFileTypes: true },
+    fs.readFile(
+      `${directory}/recipes.yml`,
     )
-      .then(
-        (dirents) => dirents
-          .filter(
-            (dirent) => dirent.isFile(),
-          )
-          .map(
-            ({
-              name,
-            }) => name,
-          )
+    .then(
+      (buffer) => buffer.toString(),
+    )
+    .catch(
+      () => '',
+    )
+    .then(
+      (yml) => fs.readdir(
+        directory,
+        { withFileTypes: true },
       )
-      .then(
-        (files) => Promise.all(
-          files.filter(
-            (file) => file.match(regex)
-          ).map(
-            (file) => path.join(
-              directory,
-              file,
-            ),
-          )
+        .then(
+          (dirents) => dirents
+            .filter(
+              (dirent) => dirent.isFile(),
+            )
             .map(
-              (filePath) => fs.readFile(
-                filePath,
-                'utf8',
-              ).then(
-                (buffer) => ({
-                  filePath,
-                  xml: new dom().parseFromString(
-                    buffer.toString(),
-                    'text/xml',
-                  ),
-                }),
-              ),
+              ({
+                name,
+              }) => name,
             )
         )
-      )
-      .then(
-        (files) => files
-          .map(
-            ({
-              filePath,
-              xml,
-            }) => ({
-              filePath,
-              areaModelDate: remove(
-                '/ra:RecipeElement/ra:Header/ra:AreaModelDate/text()',
-                xml,
+        .then(
+          (files) => Promise.all(
+            files.filter(
+              (file) => file.match(regex)
+            ).map(
+              (file) => path.join(
+                directory,
+                file,
               ),
-              verificationDate: remove(
-                '/ra:RecipeElement/ra:Header/ra:VerificationDate/text()',
-                xml,
-              ),
-              xml,
-            })
-          )
-      )
-      .then(
-        (docs) => fs.writeFile(
-          `${core.getInput('folder')}/recipes.yml`,
-          yaml.dump(
-            docs
-              .reduce(
-                (
-                  acc,
-                  {
-                    xml,
-                    filePath,
-                    ...rest
-                  },
-                ) => ({
-                  ...acc,
-                  [filePath]: rest,
-                }),
-                {},
-              )
-          ),
-        ).then(
-          () =>  Promise.all(
-            docs
+            )
               .map(
-                (
-                  {
-                    filePath,
-                    xml,
-                  }
-                ) => fs.writeFile(
+                (filePath) => fs.readFile(
                   filePath,
-                  xml.toString(),
+                  'utf8',
+                ).then(
+                  (buffer) => ({
+                    filePath,
+                    xml: new dom().parseFromString(
+                      buffer.toString(),
+                      'text/xml',
+                    ),
+                  }),
                 ),
               )
           )
         )
-      )
-      .catch(
-        (ex) => {
-          console.log(ex)
-          core.setFailed(ex.message)
-        },
-      );
+        .then(
+          (files) => files
+            .map(
+              ({
+                filePath,
+                xml,
+              }) => ({
+                filePath,
+                areaModelDate: remove(
+                  '/ra:RecipeElement/ra:Header/ra:AreaModelDate/text()',
+                  xml,
+                ) || yml[filePath]?.AreaModelDate,
+                verificationDate: remove(
+                  '/ra:RecipeElement/ra:Header/ra:VerificationDate/text()',
+                  xml,
+                ) || yml[filePath]?.verificationDate,
+                xml,
+              })
+            )
+        )
+        .then(
+          (docs) => fs.writeFile(
+            `${core.getInput('folder')}/recipes.yml`,
+            yaml.dump(
+              docs
+                .reduce(
+                  (
+                    acc,
+                    {
+                      xml,
+                      filePath,
+                      ...rest
+                    },
+                  ) => ({
+                    ...acc,
+                    [filePath]: rest,
+                  }),
+                  {},
+                )
+            ),
+          ).then(
+            () =>  Promise.all(
+              docs
+                .map(
+                  (
+                    {
+                      filePath,
+                      xml,
+                    }
+                  ) => fs.writeFile(
+                    filePath,
+                    xml.toString(),
+                  ),
+                )
+            )
+          )
+        )
+        .catch(
+          (ex) => {
+            console.log(ex)
+            core.setFailed(ex.message)
+          },
+        )
+    );
   }
   catch (error) {
     core.setFailed(error.message);

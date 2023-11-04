@@ -42645,32 +42645,33 @@ async function run() {
       core.getInput('regex') || '^.+\.(([pP][xX][mM][lL]))$' || 0,
     )
     const directory = core.getInput('folder') || './recipes'
+<<<<<<< HEAD
     fs.readdir(
       directory,
       { withFileTypes: true },
+=======
+    fs.readFile(
+      `${directory}/recipes.yml`,
+>>>>>>> e4d455a (no strip if null)
     )
-      .then(
-        (dirents) => dirents
-          .filter(
-            (dirent) => dirent.isFile(),
-          )
-          .map(
-            ({
-              name,
-            }) => name,
-          )
+    .then(
+      (buffer) => buffer.toString(),
+    )
+    .catch(
+      () => '',
+    )
+    .then(
+      (yml) => fs.readdir(
+        directory,
+        { withFileTypes: true },
       )
-      .then(
-        (files) => Promise.all(
-          files.filter(
-            (file) => file.match(regex)
-          ).map(
-            (file) => path.join(
-              directory,
-              file,
-            ),
-          )
+        .then(
+          (dirents) => dirents
+            .filter(
+              (dirent) => dirent.isFile(),
+            )
             .map(
+<<<<<<< HEAD
               (filePath) => fs.readFile(
                 filePath,
                 'utf8',
@@ -42749,6 +42750,103 @@ async function run() {
           core.setFailed(ex.message)
         },
       );
+=======
+              ({
+                name,
+              }) => name,
+            )
+        )
+        .then(
+          (files) => Promise.all(
+            files.filter(
+              (file) => file.match(regex)
+            ).map(
+              (file) => path.join(
+                directory,
+                file,
+              ),
+            )
+              .map(
+                (filePath) => fs.readFile(
+                  filePath,
+                  'utf8',
+                ).then(
+                  (buffer) => ({
+                    filePath,
+                    xml: new dom().parseFromString(
+                      buffer.toString(),
+                      'text/xml',
+                    ),
+                  }),
+                ),
+              )
+          )
+        )
+        .then(
+          (files) => files
+            .map(
+              ({
+                filePath,
+                xml,
+              }) => ({
+                filePath,
+                areaModelDate: remove(
+                  '/ra:RecipeElement/ra:Header/ra:AreaModelDate/text()',
+                  xml,
+                ) || yml[filePath]?.AreaModelDate,
+                verificationDate: remove(
+                  '/ra:RecipeElement/ra:Header/ra:VerificationDate/text()',
+                  xml,
+                ) || yml[filePath]?.verificationDate,
+                xml,
+              })
+            )
+        )
+        .then(
+          (docs) => fs.writeFile(
+            `${core.getInput('folder')}/recipes.yml`,
+            yaml.dump(
+              docs
+                .reduce(
+                  (
+                    acc,
+                    {
+                      xml,
+                      filePath,
+                      ...rest
+                    },
+                  ) => ({
+                    ...acc,
+                    [filePath]: rest,
+                  }),
+                  {},
+                )
+            ),
+          ).then(
+            () =>  Promise.all(
+              docs
+                .map(
+                  (
+                    {
+                      filePath,
+                      xml,
+                    }
+                  ) => fs.writeFile(
+                    filePath,
+                    xml.toString(),
+                  ),
+                )
+            )
+          )
+        )
+        .catch(
+          (ex) => {
+            console.log(ex)
+            core.setFailed(ex.message)
+          },
+        )
+    );
+>>>>>>> e4d455a (no strip if null)
   }
   catch (error) {
     core.setFailed(error.message);
