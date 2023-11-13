@@ -42665,6 +42665,12 @@ async function run() {
       () => '',
     )
     .then(yaml.load)
+<<<<<<< HEAD
+=======
+    .then(
+      (yml) => yml || {},
+    )
+>>>>>>> bc357a3 (deal with blank recipes.yml)
     .then(
       (yml) => fs.readdir(
         directory,
@@ -42718,12 +42724,12 @@ async function run() {
                 AreaModelDate: remove(
                   '/ra:RecipeElement/ra:Header/ra:AreaModelDate/text()',
                   xml,
-                  yml[filePath].AreaModelDate,
+                  yml[filePath]?.AreaModelDate,
                 ),
                 VerificationDate: remove(
                   '/ra:RecipeElement/ra:Header/ra:VerificationDate/text()',
                   xml,
-                  yml[filePath].VerificationDate,
+                  yml[filePath]?.VerificationDate,
                 ),
                 xml,
               })
