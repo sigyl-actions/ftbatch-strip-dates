@@ -42665,12 +42665,9 @@ async function run() {
       () => '',
     )
     .then(yaml.load)
-<<<<<<< HEAD
-=======
     .then(
       (yml) => yml || {},
     )
->>>>>>> bc357a3 (deal with blank recipes.yml)
     .then(
       (yml) => fs.readdir(
         directory,
