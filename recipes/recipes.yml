@@ -1,1 +1,3 @@
-recipes/p.pxml: {}
+recipes/p.pxml:
+  AreaModelDate: '1951-02-28T00:00:00'
+  VerificationDate: '1951-02-28T00:00:00'

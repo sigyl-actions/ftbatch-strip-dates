@@ -25,14 +25,25 @@ const remove = (
   const time = node[0]?.parentNode.removeChild(
     node[0].nodeValue,
   );
-  node[0].appendChild(
-    xml
-      .createTextNode(
-        '1950-02-28T00:00:00',
-      ),
-  )
-
-  if (time === '1950-02-28T00:00:00') {
+  if (!node[0]) {
+    select(
+      xpath.replace('/text()', ''),
+      xml,
+    )[0].appendChild(
+      xml
+        .createTextNode(
+          '1950-02-28T00:00:00',
+        ),
+    )  
+  } else {
+    node[0]?.parentNode.appendChild(
+      xml
+        .createTextNode(
+          '1950-02-28T00:00:00',
+        ),
+    )  
+  }
+  if (time === '1950-02-28T00:00:00' || time === undefined) {
     return or;
   }
   return time.toString();

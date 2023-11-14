@@ -5,7 +5,7 @@
     <Abstract/>
     <ApprovedBy/>
     <AreaModel>C:\USERS\GILES\BATCH-EXAMPLE\UNTITLED.CFG</AreaModel>
-    <AreaModelDate/>
+    <AreaModelDate>1950-02-28T00:00:00</AreaModelDate>
     <Author>SQL-15\GILES</Author>
     <BeingEditedBy>Not being handled yet</BeingEditedBy>
     <ClassBased>true</ClassBased>
@@ -23,7 +23,7 @@
     <Released>0</Released>
     <ReleaseAsStep>true</ReleaseAsStep>
     <Resource>UNIT_CLS1</Resource>
-    <VerificationDate/>
+    <VerificationDate>1950-02-28T00:00:00</VerificationDate>
     <Version>1.0</Version>
     <VersionDate>2023-11-03T08:49:19</VersionDate>
     <Obsoleted>false</Obsoleted>
