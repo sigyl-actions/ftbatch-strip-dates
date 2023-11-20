@@ -42629,21 +42629,38 @@ var yaml = __nccwpck_require__(1917);
 
 const select = xpath.useNamespaces({ ra: 'urn:Rockwell/MasterRecipe' });
 
+
 const remove = (
   xpath,
   xml,
   or,
 ) => {
-  const time = select(
+  const node = select(
     xpath,
     xml,
-  )[0]?.parentNode.removeChild(
-    select(
-      xpath,
-      xml,
-    )[0].nodeValue,
+  )
+  const time = node[0]?.parentNode.removeChild(
+    node[0].nodeValue,
   );
-  if (time === undefined) {
+  if (!node[0]) {
+    select(
+      xpath.replace('/text()', ''),
+      xml,
+    )[0].appendChild(
+      xml
+        .createTextNode(
+          '1950-02-28T00:00:00',
+        ),
+    )  
+  } else {
+    node[0]?.parentNode.appendChild(
+      xml
+        .createTextNode(
+          '1950-02-28T00:00:00',
+        ),
+    )  
+  }
+  if (time === '1950-02-28T00:00:00' || time === undefined) {
     return or;
   }
   return time.toString();
